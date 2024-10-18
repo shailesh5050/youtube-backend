@@ -1,0 +1,26 @@
+# Ignore node_modules directory
+node_modules/
+
+# Ignore build outputs
+dist/
+build/
+
+# Ignore configuration files
+package-lock.json
+yarn.lock
+
+# Ignore environment files
+.env
+
+# Ignore logs
+*.log
+
+# Ignore compiled JS files
+*.min.js
+
+# Ignore assets (if applicable)
+public/
+static/
+
+# Ignore specific files (e.g., already formatted with another tool)
+*.json
