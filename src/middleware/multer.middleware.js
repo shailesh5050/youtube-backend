@@ -1,5 +1,4 @@
 import multer from 'multer';
-import { uploadFile } from '../utils/claudinary';
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

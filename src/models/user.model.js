@@ -1,19 +1,30 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const userSchema = mongoose.Schema(
   {
     username: {
       type: String,
-      required: true,
-      unique: true,
       trim: true,
       lowercase: true,
+      unique: true,
+      validate: {
+        validator: function (value) {
+          return this.email || value; // valid if email exists or username has a value
+        },
+        message: 'Either username or email is required',
+      },
     },
     email: {
       type: String,
-      required: true,
       unique: true,
+      validate: {
+        validator: function (value) {
+          return this.username || value; // valid if username exists or email has a value
+        },
+        message: 'Either email or username is required',
+      },
     },
     fullname: {
       type: String,
@@ -36,23 +47,29 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    refreshToken: {
+      type: String,
+    },
   },
   {
     timestamps: true,
   }
 );
 
+// Hash password before saving
 userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-userSchema.method.checkPassword = async function (password) {
+// Define methods
+userSchema.methods.checkPassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-userSchema.method.generateAccessToken = function () {
+userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
       _id: this._id,
@@ -61,22 +78,14 @@ userSchema.method.generateAccessToken = function () {
       email: this.email,
     },
     process.env.ACCESS_TOKEN_SECRET,
-    {
-      expiresIn: '1d',
-    }
+    { expiresIn: '1d' }
   );
 };
 
-userSchema.method.generateRefreshToken = function () {
-  return jwt.sign(
-    {
-      _id: this._id,
-    },
-    process.env.REFRESH_TOKEN_SECRET,
-    {
-      expiresIn: '10d',
-    }
-  );
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign({ _id: this._id }, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: '10d',
+  });
 };
 
 const User = mongoose.model('User', userSchema);
