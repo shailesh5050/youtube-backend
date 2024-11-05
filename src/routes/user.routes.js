@@ -4,13 +4,11 @@ import {
   loginUser,
   logoutUser,
   refreshAccessToken,
-  getCurrentUser,
   changeCurrentPassword,
+  getCurrentUser,
+  updateAvatar,
+  updateCoverImage,
   getUserChannelProfile,
-  getUserHistory,
-  updateUserAvatar,
-  updateUserCoverImage,
-  subscribeToChannel,
 } from '../controllers/user.controller.js';
 
 import { upload } from '../middleware/multer.middleware.js';
@@ -33,11 +31,10 @@ router.route('/change-password').post(verifyToken, changeCurrentPassword);
 router.route('/current-user').get(verifyToken, getCurrentUser);
 router
   .route('/avatar')
-  .patch(verifyToken, upload.single('avatar'), updateUserAvatar);
+  .patch(verifyToken, upload.single('avatar'), updateAvatar);
 router
   .route('/cover-image')
-  .patch(verifyToken, upload.single('coverImage'), updateUserCoverImage);
+  .patch(verifyToken, upload.single('coverImage'), updateCoverImage);
 router.route('/c/:username').get(verifyToken, getUserChannelProfile);
-router.route('/history').get(verifyToken, getUserHistory);
 
 export default router;
